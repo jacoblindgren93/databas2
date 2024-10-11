@@ -19,7 +19,7 @@ export default function Login(){
 	}
 
 	return(
-		<div className="flex justify-center items-center w-full bg-neutral-200">
+		<div className="flex justify-center items-center w-full ">
 			<div className="bg-white w-[500px] h-[360px] rounded-md p-16">
 				<form onSubmit={onSignIn}>
 					<div className="mt-4">
