@@ -36,6 +36,15 @@ const salesData = {
 	},
 };
 
+const analyticsData = {
+	"gross-profit": [1200, 1400, 1500, 1300, 1700, 1800, 1900, 1600, 2000, 2200, 2400, 2500],
+	expenses: [400, 300, 350, 380, 450, 420, 470, 460, 480, 500, 520, 540],
+	"net-profit": [800, 1100, 1150, 920, 1250, 1380, 1430, 1140, 1520, 1700, 1880, 1960],
+	"stock-minced-meat-august": 300,
+	"most-popular-dish": "Pizza",
+	"least-popular-dish": "Meatball Pasta",
+};
+
 const menuItems = [
 	{ id: 0, name: "Smashburger" },
 	{ id: 1, name: "CocaCola" },
@@ -46,16 +55,19 @@ const menuItems = [
 export default function Stats() {
 	const [selectedItem, setSelectedItem] = useState("Smashburger");
 	const [timeRange, setTimeRange] = useState("latest7Days");
+	const [selectedMetric, setSelectedMetric] = useState("gross-profit");
+
+	const metrics = ["gross-profit", "expenses", "net-profit"];
 
 	const data = {
 		labels:
 			timeRange === "latest7Days"
 				? ["Day 1", "Day 2", "Day 3", "Day 4", "Day 5", "Day 6", "Day 7"]
 				: timeRange === "latestMonth"
-					? Array.from({ length: 12 }, (_, i) => `Day ${i + 1}`)
-					: timeRange === "latestYear"
-						? ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
-						: [],
+				? Array.from({ length: 12 }, (_, i) => `Day ${i + 1}`)
+				: timeRange === "latestYear"
+				? ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+				: [],
 		datasets: [
 			{
 				label: `Sales for ${selectedItem}`,
@@ -67,40 +79,106 @@ export default function Stats() {
 		],
 	};
 
+	const handleMetricChange = (e) => {
+		setSelectedMetric(e.target.value);
+	};
+
 	return (
 		<div className="container mx-auto pt-4">
-			<h1 className="text-2xl font-bold mb-4">Sales Stats</h1>
+			<h1 className="text-2xl font-bold mb-4">Sales Stats and Analytics</h1>
 
-			<div className="mb-4">
-				<label className="block text-lg font-medium mb-2">Select Menu Item:</label>
-				<select
-					value={selectedItem}
-					onChange={(e) => setSelectedItem(e.target.value)}
-					className="px-4 py-2 border border-gray-300 rounded-lg bg-white text-black focus:outline-none focus:ring focus:border-blue-500"
-				>
-					{menuItems.map((item) => (
-						<option key={item.id} value={item.name}>
-							{item.name}
-						</option>
-					))}
-				</select>
-			</div>
+			<div className="flex flex-col lg:flex-row lg:space-x-8">
+				{/* Graph Section */}
+				<div className="lg:w-1/2 mb-8 lg:mb-0">
+					<h2 className="text-xl font-bold mb-4">Sales Graph</h2>
 
+					<div className="mb-4">
+						<label className="block text-lg font-medium mb-2">Select Menu Item:</label>
+						<select
+							value={selectedItem}
+							onChange={(e) => setSelectedItem(e.target.value)}
+							className="px-4 py-2 border border-gray-300 rounded-lg bg-white text-black focus:outline-none focus:ring focus:border-blue-500"
+						>
+							{menuItems.map((item) => (
+								<option key={item.id} value={item.name}>
+									{item.name}
+								</option>
+							))}
+						</select>
+					</div>
 
-			<div className="mb-4 space-x-4">
-				<button onClick={() => setTimeRange("latest7Days")} className="px-4 py-2 bg-blue-500 text-white rounded">
-					Latest 7 Days
-				</button>
-				<button onClick={() => setTimeRange("latestMonth")} className="px-4 py-2 bg-blue-500 text-white rounded">
-					Latest Month
-				</button>
-				<button onClick={() => setTimeRange("latestYear")} className="px-4 py-2 bg-blue-500 text-white rounded">
-					Latest Year
-				</button>
-			</div>
+					<div className="mb-4 space-x-4">
+						<button
+							onClick={() => setTimeRange("latest7Days")}
+							className="px-4 py-2 bg-blue-500 text-white rounded"
+						>
+							Latest 7 Days
+						</button>
+						<button
+							onClick={() => setTimeRange("latestMonth")}
+							className="px-4 py-2 bg-blue-500 text-white rounded"
+						>
+							Latest Month
+						</button>
+						<button
+							onClick={() => setTimeRange("latestYear")}
+							className="px-4 py-2 bg-blue-500 text-white rounded"
+						>
+							Latest Year
+						</button>
+					</div>
 
-			<div>
-				<Line data={data} />
+					{/* Adjusted graph size */}
+					<div className="w-full h-64">
+						<Line data={data} />
+					</div>
+				</div>
+
+				{/* Analytics Section */}
+				<div className="lg:w-1/2">
+					<h2 className="text-xl font-bold mb-4">Analytics</h2>
+					<div className="mb-4">
+						<label className="block text-lg font-medium mb-2">Select Metric:</label>
+						<select
+							value={selectedMetric}
+							onChange={handleMetricChange}
+							className="px-4 py-2 border border-gray-300 rounded-lg bg-white text-black focus:outline-none focus:ring focus:border-blue-500"
+						>
+							{metrics.map((metric, index) => (
+								<option key={index} value={metric}>
+									{metric.replace("-", " ").toUpperCase()}
+								</option>
+							))}
+						</select>
+					</div>
+
+					{selectedMetric === "gross-profit" || selectedMetric === "expenses" || selectedMetric === "net-profit" ? (
+						<table className="table-auto border-collapse border border-gray-300 w-full">
+							<thead style={{ textAlign: "left" }}>
+								<tr>
+									<th className="border px-4 py-2">Month</th>
+									<th className="border px-4 py-2">Amount</th>
+								</tr>
+							</thead>
+							<tbody>
+								{analyticsData[selectedMetric].map((value, index) => (
+									<tr key={index}>
+										<td className="border px-4 py-2">{`Month ${index + 1}`}</td>
+										<td className="border px-4 py-2">${value}</td>
+									</tr>
+								))}
+							</tbody>
+						</table>
+					) : (
+							<div className="mt-4">
+								{selectedMetric === "stock-minced-meat-august" && (
+									<p>Expected Stock for Minced Meat in August: {analyticsData[selectedMetric]} kg</p>
+								)}
+								{selectedMetric === "most-popular-dish" && <p>Most Popular Dish: {analyticsData[selectedMetric]}</p>}
+								{selectedMetric === "least-popular-dish" && <p>Least Popular Dish: {analyticsData[selectedMetric]}</p>}
+							</div>
+						)}
+				</div>
 			</div>
 		</div>
 	);
