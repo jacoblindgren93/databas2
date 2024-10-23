@@ -5,9 +5,11 @@ import { MenuItemDisplay } from "@/types/menuItemDisplay";
 
 interface CheckOutItemProps {
   item: MenuItemDisplay;
+  incSum: (num: number) => void;
+  decSum: (num: number) => void;
 }
 
-export default function CheckOutItem({ item }: CheckOutItemProps) {
+export default function CheckOutItem({ item, incSum, decSum}: CheckOutItemProps) {
 
   const [quantity, setQuantity] = useState(1)
 
@@ -17,6 +19,12 @@ export default function CheckOutItem({ item }: CheckOutItemProps) {
       return;
     }
     setQuantity((prev) => prev - 1);;
+	decSum(item.unitPrice)
+  }
+
+  function incrementQuantity(){
+	setQuantity((prev) => prev + 1)
+	incSum(item.unitPrice)
   }
 
   return (
@@ -26,7 +34,7 @@ export default function CheckOutItem({ item }: CheckOutItemProps) {
         <div className="bg-white font-bold rounded-md w-[25px] ml-2 mr-2 select-none pointer-events-none">
           {quantity}
         </div>
-        <QuantityBtn icon={<PlusIcon />} onClick={() => setQuantity((prev) => prev + 1)} />
+        <QuantityBtn icon={<PlusIcon />} onClick={incrementQuantity}  />
       </div>
       <div className="font-medium text-[13px] bg-white p-2 rounded-md w-full select-none">
         {`$${item.unitPrice} ${item.name}`}

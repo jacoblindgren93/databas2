@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Line } from "react-chartjs-2";
 import {
 	Chart as ChartJS,
@@ -10,6 +10,8 @@ import {
 	Tooltip,
 	Legend,
 } from "chart.js";
+import {MenuItemDisplayContext} from "@/providers/dishes";
+import {Alert} from "@/components/ui/alert";
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
@@ -45,21 +47,31 @@ const analyticsData = {
 	"least-popular-dish": "Meatball Pasta",
 };
 
-const menuItems = [
-	{ id: 0, name: "Smashburger" },
-	{ id: 1, name: "CocaCola" },
-	{ id: 2, name: "Pizza" },
-	{ id: 3, name: "MeatballPasta" },
-];
 
 export default function Stats() {
+
+	const {items} = useContext(MenuItemDisplayContext)
+
+	const menuItems = items
 	const [selectedItem, setSelectedItem] = useState("Smashburger");
 	const [timeRange, setTimeRange] = useState("latest7Days");
 	const [selectedMetric, setSelectedMetric] = useState("gross-profit");
-
+	const [error, setError] = useState(false)
 	const metrics = ["gross-profit", "expenses", "net-profit"];
-
-	const data = {
+	
+	const changeSelectedItem = (value: string) => {
+		console.log("TRIGGER")
+		setError(true)
+		items.forEach((item) => {
+			if(item.name == value){
+				console.log
+				setSelectedItem(value)
+				setError(false)
+			}
+		})
+	}
+	console.log("error", error)
+	const data = !error && {
 		labels:
 			timeRange === "latest7Days"
 				? ["Day 1", "Day 2", "Day 3", "Day 4", "Day 5", "Day 6", "Day 7"]
@@ -78,7 +90,6 @@ export default function Stats() {
 			},
 		],
 	};
-
 	const handleMetricChange = (e) => {
 		setSelectedMetric(e.target.value);
 	};
@@ -96,14 +107,17 @@ export default function Stats() {
 						<label className="block text-lg font-medium mb-2">Select Menu Item:</label>
 						<select
 							value={selectedItem}
-							onChange={(e) => setSelectedItem(e.target.value)}
+							onChange={(e) => changeSelectedItem(e.target.value)}
 							className="px-4 py-2 border border-gray-300 rounded-lg bg-white text-black focus:outline-none focus:ring focus:border-blue-500"
 						>
-							{menuItems.map((item) => (
+							{items.map((item) => (
 								<option key={item.id} value={item.name}>
 									{item.name}
 								</option>
 							))}
+							<option>
+								HejBaeriba
+							</option>
 						</select>
 					</div>
 
@@ -130,7 +144,7 @@ export default function Stats() {
 
 					{/* Adjusted graph size */}
 					<div className="w-full h-64">
-						<Line data={data} />
+						{!error ? <Line data={data}/> : <Alert variant="destructive">No data availible</Alert>}
 					</div>
 				</div>
 

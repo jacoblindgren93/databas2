@@ -1,18 +1,44 @@
 import CheckOut from "@/components/checkout/checkout"
 import ItemCard from "@/components/itemCard/itemCard"
-import { MenuItemDisplay } from "@/types/menuItemDisplay"
+import { MenuItemDisplay, MenuType } from "@/types/menuItemDisplay"
 import Tab from "@/components/tabs/tab"
 import Tabs from "@/components/tabs/Tabs"
-import React from "react"
+import React, {useContext, useEffect, useState} from "react"
+import {MenuItemDisplayContext} from "@/providers/dishes"
+import {Alert, AlertDescription, AlertTitle} from "@/components/ui/alert"
+import {ExclamationTriangleIcon} from "@radix-ui/react-icons"
 export default function Homepage() {
-  let items: MenuItemDisplay[] = [
-    { id: 0, name: "Smashburger", unitPrice: 90, imgUrl: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=1998&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
-    { id: 1, name: "Coca cola", unitPrice: 15, imgUrl: "https://images.unsplash.com/photo-1667204651371-5d4a65b8b5a9?q=80&w=2032&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
-    { id: 2, name: "Pizza", unitPrice: 110, imgUrl:"https://plus.unsplash.com/premium_photo-1673439304183-8840bd0dc1bf?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
-    { id: 3, name: "Meatball pasta", unitPrice: 125, imgUrl:"https://images.unsplash.com/photo-1515516969-d4008cc6241a?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+	
+	const [numOrders, setNumOrders] = useState(1);
+	const [displayItems, setDisplayItems] = useState<MenuItemDisplay[]>([])
+	const [checkOutItems, setCheckOutItems] = useState<MenuItemDisplay[]>([])
+  	const {items} = useContext(MenuItemDisplayContext)
+	const [showWarning, setShowWarning] = useState(false)
+	const [selected, setSelected] = useState<MenuType>("All");
 
-  ]
+	useEffect(() => {
+		setDisplayItems([...items])
+	}, [])
 
+
+	function orderPlaced(){
+		setNumOrders((prev) => prev+1)
+		setCheckOutItems([])
+		if(numOrders > 1){
+			setShowWarning(true)
+		}
+	}
+
+
+	function filterItems(value: MenuType){
+		setSelected(value)
+		if(value == "All"){
+			setDisplayItems([...items])
+		}else{
+			let newList = items.filter((item) => item.type == value)
+			setDisplayItems(newList)
+		}
+	}
   return (
     <div className="w-full flex justify-between">
       <div className="flex h-dvh flex-col w-full overflow-y-auto ">
@@ -20,22 +46,41 @@ export default function Homepage() {
           <div className="m-4">
 			<div>
 				<Tabs>
-					<Tab value="Starters" />
-					<Tab value="Main course" />
-					<Tab value="Dessert" />
-					<Tab value="Drinks" />
+					<Tab value="All" updateItems={filterItems} selected={selected} />
+					<Tab value="Breakfast" updateItems={filterItems}selected={selected} />
+					<Tab value="Lunch" updateItems={filterItems}selected={selected} />
+					<Tab value="Dinner" updateItems={filterItems}selected={selected} />
+					<Tab value="Dessert" updateItems={filterItems}selected={selected} />
+					<Tab value="Drink" updateItems={filterItems}selected={selected} />
 				</Tabs>
 			</div>
           </div>
+		 <center >
+			<div className="w-[50%] mt-4">
+			{showWarning &&
+				<Alert variant="destructive" className="bg-red-50">
+					<ExclamationTriangleIcon className="h-4 w-4" />
+					<AlertTitle>Warning</AlertTitle>
+					<AlertDescription>
+						Coca-Cola is low on stock
+					</AlertDescription>
+				</Alert>
+			}
+			</div>
+		</center>
         </div>
+
         <div className="w-full p-16 grid grid-cols-4 gap-16 d">
-			{items.map((item) => 
-				<ItemCard key={item.id} menuItem={item} onClick={() => console.log("CLick")} />
+			{displayItems.map((item) => { 
+				return <div onClick={() => setCheckOutItems((prev) => [...prev, item])} >
+					<ItemCard key={item.id} menuItem={item} />
+				</div>
+			}
 			)}
         </div>
       </div>
       <div>
-        <CheckOut items={items} />
+        <CheckOut items={checkOutItems} reset={() => orderPlaced()}/>
       </div>
     </div>
   )

@@ -1,5 +1,5 @@
 
-export type MenuType = "Dinner" | "Breakfast" | "Dessert"
+export type MenuType = "Dinner" | "Breakfast" | "Lunch" | "Dessert" | "All" | "Drink"
 
 export type MenuItemDisplay = {
   id: number,
